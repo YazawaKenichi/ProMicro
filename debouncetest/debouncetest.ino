@@ -1,18 +1,21 @@
-//2x2 キーマトリックス
+//1x1 キーマトリックスでデバウンス回路の実験
 //参考：https://eucalyn.hatenadiary.jp/entry/original-keyboard-07
+
 #include <Keyboard.h>
 
 #define debug 0
-#define pushdebug 1
+#define pushdebug 0
 #define mapdebug 0
+#define keydebug 1
 
-const int rownum = 2; //行の数
-const int colnum = 2; //列の数
+const int rownum = 1; //行の数
+const int colnum = 1; //列の数
 
-const int rowpin[rownum] = {2, 3};  //行 0 が 2 ピン、行 1 が 3 ピン
-const int colpin[colnum] = {4, 5};  //列 0 が 4 ピン、列 1 が 5 ピン
-const byte keymap[rownum][colnum] = {{'q', 'w'},{'a', 's'}};  //出力したい ASCII CODE をマッピングする
+const int rowpin[rownum] = {2};  //行 0 が 2 ピン、行 1 が 3 ピン
+const int colpin[colnum] = {3};  //列 0 が 4 ピン、列 1 が 5 ピン
+const byte keymap[rownum][colnum] = {{'q'}};  //出力したい ASCII CODE をマッピングする
 
+static const float debouncetime = 3 / 4;  //unit: ms  //デバウンス回路を組んだなら (3 / 4) //デバウンス回路を組んでないなら 0 とか 0.1 でも十分大丈夫な希ガス
 bool currentstate[rownum][colnum];  //現在の入力状態を記録する
 bool beforestate[rownum][colnum]; //前回の入力状態を記憶する
 
@@ -87,14 +90,18 @@ void loop()
         {
           #if pushdebug
           Serial.println("Push!");
-//          Keyboard.press(keymap[i][j]);
+          #endif
+          #if keydebug
+          Keyboard.press(keymap[i][j]);
           #endif
         }
         else
         {
           #if pushdebug
           Serial.println("Release!");
-//          Keyboard.release(keymap[i][j]);
+          #endif
+          #if keydebug
+          Keyboard.release(keymap[i][j]);
           #endif
         }
         beforestate[i][j] = currentstate[i][j];
@@ -105,11 +112,11 @@ void loop()
       #endif
     }
     digitalWrite(rowpin[i], HIGH);
-#if debug
+    #if debug
     Serial.print("rowpin[");
     Serial.print(i);
     Serial.println("] is HIGH");
-#endif
-    delay(10);
+    #endif
+    delay(debouncetime);
   }
 }
